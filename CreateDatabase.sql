@@ -17,7 +17,7 @@ CREATE TABLE AcceleratorsProjects(
 
 CREATE TABLE Professions(
 	ProfessionId int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	Name VARCHAR(30) NOT NULL UNIQUE CHECK(Name ='engineer' OR Name= 'programmer' OR Name='physicist' OR Name='material scientist')
+	Name VARCHAR(30) NOT NULL CHECK(Name ='engineer' OR Name= 'programmer' OR Name='physicist' OR Name='material scientist')
 );
 
 CREATE TABLE Countries(
@@ -45,14 +45,14 @@ CREATE TABLE Scientists(
 	LastName VARCHAR(30) NOT NULL,
 	BirthDate TIMESTAMP NOT NULL,
 	CountryId INT REFERENCES Countries(CountryId),
-	Gender VARCHAR(30) NOT NULL UNIQUE CHECK(Gender ='Male' OR Gender='Female' OR Gender ='Not known' OR Gender='not applicable'),
+	Gender VARCHAR(30) NOT NULL CHECK(Gender ='Male' OR Gender='Female' OR Gender ='Not known' OR Gender='not applicable'),
 	ProfessionId INT REFERENCES Professions(ProfessionId),
 	HotelId INT REFERENCES Hotels(HotelId)
 );
 
 CREATE TABLE ReasearchPapers(
 	ReasearchPaperId int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	Title CHAR(30) NOT NULL,
+	Title VARCHAR NOT NULL,
 	Quoted INT CHECK (Quoted>=0),
 	ProjectId INT REFERENCES Projects(ProjectId)
 );
@@ -70,4 +70,3 @@ CREATE TABLE ScientistsWork(
 	ResearchPaperId INT REFERENCES ResearchPapers(ResearchPaperId),
 	ScientistId INT REFERENCES Scientists(ScientistId)
 );
-
