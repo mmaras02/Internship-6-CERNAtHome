@@ -15,7 +15,7 @@ JOIN Countries c ON c.CountryId = s.CountryId
 SELECT DISTINCT p.Name AS Project,a.Name AS Accelerator FROM Projects p
 JOIN AcceleratorsProjects ap ON ap.ProjectId=p.ProjectId
 JOIN Accelerators a ON a.AcceleratorId=ap.AcceleratorId
-GROUP BY p.Name,a.Name,
+GROUP BY DISTINCT p.Name,a.Name,
 CASE
 	WHEN(a.Name IS NULL) THEN 'None'
 	ELSE (a.Name) END
@@ -23,7 +23,15 @@ CASE
 --4--
 SELECT DISTINCT p.Name FROM Projects p
 JOIN ResearchPapers rp ON rp.ProjectId=p.ProjectId
-WHERE EXTRACT(YEAR FROM rp.DateOfIssue)=2015 AND EXTRACT(YEAR FROM rp.DateOfIssue)=2017
+WHERE EXTRACT(YEAR FROM rp.DateOfIssue)>=2015 AND EXTRACT(YEAR FROM rp.DateOfIssue)<=2017
+
+--5--
+SELECT c.Name AS Country,COUNT(sw.ResearchPaperId) AS NumberOfResearchPapers,rp.Title AS MostQuotedPaper FROM Scientists s
+JOIN ScientistsWork sw ON sw.ScientistId = s.ScientistId
+JOIN Countries c ON c.CountryId = s.CountryId
+JOIN ResearchPapers rp ON rp.ResearchPaperId = sw.ResearchPaperId
+GROUP BY c.Name, rp.Title, rp.Quoted
+HAVING rp.Quoted = MAX(rp.Quoted);
 
 --6--
 SELECT c.Name AS Country,
@@ -41,11 +49,16 @@ GROUP BY ci.Name
 ORDER BY COUNT(s.FirstName) DESC
 
 --8--
-SELECT a.Name, AVG(rp.Quoted) FROM Accelerators a
+SELECT a.Name, ROUND(AVG(rp.Quoted),2) FROM Accelerators a
 JOIN AcceleratorsProjects ap ON ap.AcceleratorId = a.AcceleratorId
 JOIN Projects p ON p.ProjectId = ap.ProjectId
 JOIN ResearchPapers rp ON rp.ProjectId = p.ProjectId
 GROUP BY a.Name
 
 
-
+--9--
+SELECT DISTINCT pr.Name,DATE_PART('decade', s.BirthDate) AS BirthDecade, s.Gender, COUNT(*) AS NumberOfScientists FROM Scientists s
+JOIN Professions pr ON pr.ProfessionId=s.ProfessionId
+GROUP BY pr.Name, DATE_PART('decade', s.BirthDate), s.Gender
+--HAVING COUNT(*) > 20
+ORDER BY  DATE_PART('decade', s.BirthDate)
