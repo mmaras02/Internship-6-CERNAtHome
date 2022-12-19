@@ -26,12 +26,20 @@ JOIN ResearchPapers rp ON rp.ProjectId=p.ProjectId
 WHERE EXTRACT(YEAR FROM rp.DateOfIssue)>=2015 AND EXTRACT(YEAR FROM rp.DateOfIssue)<=2017
 
 --5--
-SELECT c.Name AS Country,COUNT(sw.ResearchPaperId) AS NumberOfResearchPapers,rp.Title AS MostQuotedPaper FROM Scientists s
-JOIN ScientistsWork sw ON sw.ScientistId = s.ScientistId
-JOIN Countries c ON c.CountryId = s.CountryId
-JOIN ResearchPapers rp ON rp.ResearchPaperId = sw.ResearchPaperId
-GROUP BY c.Name, rp.Title, rp.Quoted
-HAVING rp.Quoted = MAX(rp.Quoted);
+SELECT c.Name AS Country, COUNT(rp.ResearchPaperId) AS NumberOfResearchPapers,
+COALESCE (CAST((SELECT rps.Title AS MostQuotedPaper FROM ResearchPapers rps
+	JOIN ScientistsWork sws ON sws.ResearchPaperId=rps.ResearchPaperId
+	JOIN Scientists sn ON sn.ScientistId=sws.ScientistId
+	JOIN Countries cn ON cn.CountryId=sn.CountryId
+	WHERE c.Name=cn.Name
+	ORDER BY rps.Quoted DESC
+	LIMIT 1) AS VARCHAR),'None')
+FROM Countries c
+JOIN Scientists s ON s.CountryId=c.CountryId
+JOIN ScientistsWork sw ON sw.ScientistId=s.ScientistId
+JOIN ResearchPapers rp ON rp.ResearchPaperId=sw.ResearchPaperId
+GROUP BY c.Name
+
 
 --6--
 SELECT c.Name AS Country,
