@@ -40,7 +40,6 @@ JOIN ScientistsWork sw ON sw.ScientistId=s.ScientistId
 JOIN ResearchPapers rp ON rp.ResearchPaperId=sw.ResearchPaperId
 GROUP BY c.Name
 
-
 --6--
 SELECT c.Name AS Country,
 	COALESCE(CAST((SELECT MIN(rp.DateOfIssue) FROM ResearchPapers rp
@@ -70,3 +69,29 @@ JOIN Professions pr ON pr.ProfessionId=s.ProfessionId
 GROUP BY pr.Name, DATE_PART('decade', s.BirthDate), s.Gender
 --HAVING COUNT(*) > 20
 ORDER BY  DATE_PART('decade', s.BirthDate)
+
+--Bonus--
+--koliko se dobije eura po radu 
+SELECT rp.ResearchPaperId, SQRT(rp.Quoted)/COUNT(*) AS Money FROM Scientists s
+JOIN ScientistsWork sw ON s.ScientistId = sw.ScientistId
+JOIN ResearchPapers rp ON rp.ResearchPaperId = sw.ResearchPaperId
+GROUP BY rp.ResearchPaperId
+
+--
+SELECT s.FirstName || ' ' || s.LastName AS Scientist,
+SUM(m.money) AS EarnedMoney
+FROM (SELECT rp.ResearchPaperId,  
+	DIV(CAST(SQRT(rp.Quoted)AS INTEGER), (SELECT COUNT(*) FROM ScientistsWork sw WHERE sw.ResearchPaperId = rp.ResearchPaperId)) AS money	  
+FROM ResearchPapers rp ) m
+JOIN ScientistsWork sws ON sws.ResearchPaperId = m.ResearchPaperId
+JOIN Scientists s ON s.ScientistId = sws.ScientistId
+GROUP BY s.ScientistId
+ORDER BY 2  DESC
+LIMIT 10
+
+
+
+
+
+
+
